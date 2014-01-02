@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Interface describing the behaviour of a notice board.
  * 
- * 
+ * © Bencara Systems Ltd
  * 
  * @author Les Eckersley
  * 

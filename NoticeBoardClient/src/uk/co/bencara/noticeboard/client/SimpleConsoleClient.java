@@ -15,6 +15,7 @@ import uk.co.bencara.noticeboard.local.NoticeBoardLocalImpl;
  * 
  * This implementation allows the user to exit application by entering exit
  * 
+ * © Bencara Systems Ltd
  * 
  * @author Les Eckersley
  * 

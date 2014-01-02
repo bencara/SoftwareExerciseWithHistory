@@ -19,6 +19,8 @@ import uk.co.bencara.noticeboard.model.User;
 /**
  * A class to test the the ResponseFormatter class functionality
  * 
+ * © Bencara Systems Ltd
+ * 
  * @author Les Eckersley
  * 
  */

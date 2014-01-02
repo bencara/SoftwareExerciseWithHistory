@@ -15,6 +15,8 @@ import uk.co.bencara.noticeboard.model.User;
 /**
  * A class to independently test the UserManager class.
  * 
+ * © Bencara Systems Ltd
+ * 
  * @author Les Eckersley
  * 
  */

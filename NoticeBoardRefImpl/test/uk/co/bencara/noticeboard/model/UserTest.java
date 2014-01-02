@@ -15,6 +15,8 @@ import uk.co.bencara.noticeboard.model.User;
 /**
  * A class to test the User POJO class.
  * 
+ * © Bencara Systems Ltd
+ * 
  * @author Les Eckersley
  * 
  */

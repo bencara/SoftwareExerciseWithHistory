@@ -11,6 +11,8 @@ import org.junit.Test;
 /**
  * A class to test the NoticeBoardCommand class
  * 
+ * © Bencara Systems Ltd
+ * 
  * @author Les Eckersley
  * 
  */

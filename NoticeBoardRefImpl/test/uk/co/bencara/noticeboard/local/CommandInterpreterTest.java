@@ -14,7 +14,9 @@ import uk.co.bencara.noticeboard.local.NoticeBoardCommandType;
 
 /**
  * A class to test the functionality of the CommandInterpreter, currently this
- * only test the behaviuor with valid inputs
+ * only test the behaviuor with valid inputs.
+ * 
+ * © Bencara Systems Ltd
  * 
  * @author Les Eckersley
  * 

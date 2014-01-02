@@ -340,16 +340,16 @@ public class NoticeBoardLocalImplTest {
 
 		assertTrue(
 				"The responses may be for the wrong user or not in the correct order",
-				responseLines.get(0).startsWith(EXPECTED_JOHN_RESPONSE_1_START));
+				responseLines.get(0).startsWith(EXPECTED_JOHN_RESPONSE_4_START));
 		assertTrue(
 				"The responses may be for the wrong user or not in the correct order",
-				responseLines.get(1).startsWith(EXPECTED_JOHN_RESPONSE_2_START));
+				responseLines.get(1).startsWith(EXPECTED_JOHN_RESPONSE_3_START));
 		assertTrue(
 				"The responses may be for the wrong user or not in the correct order",
-				responseLines.get(2).startsWith(EXPECTED_JOHN_RESPONSE_3_START));
+				responseLines.get(2).startsWith(EXPECTED_JOHN_RESPONSE_2_START));
 		assertTrue(
 				"The responses may be for the wrong user or not in the correct order",
-				responseLines.get(3).startsWith(EXPECTED_JOHN_RESPONSE_4_START));
+				responseLines.get(3).startsWith(EXPECTED_JOHN_RESPONSE_1_START));
 	}
 
 	/**
