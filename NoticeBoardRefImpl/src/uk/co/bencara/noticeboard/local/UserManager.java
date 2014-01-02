@@ -8,6 +8,7 @@ import java.util.Map;
 
 import uk.co.bencara.noticeboard.model.User;
 
+
 /**
  * A class to manage the retrieval and creation of users.
  * Typically this would be a singleton within a particular instance of the application

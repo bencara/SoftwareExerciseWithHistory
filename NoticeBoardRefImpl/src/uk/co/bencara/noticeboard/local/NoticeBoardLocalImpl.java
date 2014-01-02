@@ -5,8 +5,10 @@ package uk.co.bencara.noticeboard.local;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -15,6 +17,8 @@ import uk.co.bencara.noticeboard.model.PostedMessage;
 import uk.co.bencara.noticeboard.model.User;
 
 /**
+ * A class to coordinate the processing of the Notice board requests.
+ * 
  * @author Les Eckersley
  * 
  */
@@ -23,15 +27,15 @@ public class NoticeBoardLocalImpl implements NoticeBoard {
 	private CommandInterpreter interpreter = new CommandInterpreter();
 
 	private UserManager userManager = new UserManager();
-	
+
 	private ResponseFormatter respFormatter = new ResponseFormatter();
 
 	private Map<String, SortedSet<PostedMessage>> sortedMessagesForAuthorByAuthorName = new HashMap<String, SortedSet<PostedMessage>>();
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * An implementation of the declared processRequest NoticeBoard method.
 	 * 
-	 * @see uk.co.bencara.noticeboard.NoticeBoard#makeRequest(java.lang.String)
+	 * @see co.uk.bencara.noticeboard.NoticeBoard#processRequest(java.lang.String)
 	 */
 	@Override
 	public List<String> processRequest(String commandString) {
@@ -45,8 +49,10 @@ public class NoticeBoardLocalImpl implements NoticeBoard {
 			return null;
 		}
 
+		// Set up the response holder
 		List<String> response = null;
 
+		// Call the appropriate method based on the command type of the request
 		switch (command.getCommandType()) {
 		case READ:
 			response = readMessages(command.getFirstUserName(),
@@ -69,7 +75,7 @@ public class NoticeBoardLocalImpl implements NoticeBoard {
 			break;
 
 		default:
-			// TODO the command is not an uninterpretable type
+			// TODO behaviour when the command is not an uninterpretable type
 			break;
 		}
 
@@ -77,14 +83,77 @@ public class NoticeBoardLocalImpl implements NoticeBoard {
 
 	}
 
-	private List<String> getMessageWall(String firstUserName,
+	/**
+	 * A method to perform the functionality associated with the wall command
+	 * which displays and post time ordered list of formatted messages for the
+	 * source user and any users that they have requested to follow.
+	 * 
+	 * @param sourceUserName
+	 *            the source of the follow request
+	 * @return the a post time ordered list of the formatted messages posted by
+	 *         the source user and the users that they follow, if the request
+	 *         could not be processed, error lines to be displayed to the user
+	 *         will be returned (TBC)
+	 */
+	private List<String> getMessageWall(String sourceUserName,
 			long requestReceiptTime) {
-		// TODO Auto-generated method stub
-		return null;
+		// Get the user for the request source user creating one if necessary
+		// TODO defend against illegal argument if the user name is invalid
+		User sourceUser = userManager.retrieveUser(sourceUserName, true);
+
+		// Create the set to hold and order the messages
+		Set<PostedMessage> naturalOrderedSetOfWallMessages = new TreeSet<PostedMessage>();
+
+
+		// Create a list of all the users whose messages should be in the wall
+		// this includes the source user
+		Set<User> allAuthorsForWall = new HashSet<User>(sourceUser.getFollowedAuthors());
+		allAuthorsForWall.add(sourceUser);
+		
+		// Add all the messages for the followed authors
+		for (User followedAuthor : allAuthorsForWall) {
+			Set<PostedMessage> followedAuthorsMessages = sortedMessagesForAuthorByAuthorName
+					.get(followedAuthor.getName());
+			if (followedAuthorsMessages != null && followedAuthorsMessages.size() > 0 ) {
+				naturalOrderedSetOfWallMessages
+				.addAll(followedAuthorsMessages);
+			}
+			
+		}
+		
+		// Convert the messages into response strings
+		List<String> responseLines = respFormatter.formatMessagesForResponse(
+				new ArrayList<PostedMessage>(naturalOrderedSetOfWallMessages),requestReceiptTime);
+				
+		// Return the response strings
+		return responseLines;
 	}
 
-	private List<String> followUser(String firstUserName, String secondUserName) {
-		// TODO
+	/**
+	 * A method to perform the functionality associated with setting a user to
+	 * follow another user.
+	 * 
+	 * @param sourceUserName
+	 *            the source of the follow request
+	 * @param targetUserName
+	 *            the user who the source user wants to follow
+	 * @return error lines to be displayed to the user cannot follow the
+	 *         specified user (TBC)
+	 */
+	private List<String> followUser(String sourceUserName, String targetUserName) {
+		// Get the user for the request source user creating one if necessary
+		// TODO defend against illegal argument if the user name is invalid
+		User sourceUser = userManager.retrieveUser(sourceUserName, true);
+
+		User targetUser = userManager.retrieveUser(targetUserName, false);
+
+		// Check that the target user exists
+		if (targetUser == null) {
+			// TODO behaviour when the target user is not known to the system
+		}
+
+		sourceUser.addFollowedAuthor(targetUser);
+
 		return null;
 	}
 
@@ -98,7 +167,7 @@ public class NoticeBoardLocalImpl implements NoticeBoard {
 	 *            may not be trivial
 	 * @param requestReceiptTime
 	 * @return error lines to be displayed to the user if the request could not
-	 *         be completed
+	 *         be completed (TBC)
 	 */
 	private List<String> postMessage(String author, String message,
 			long requestReceiptTime) {
@@ -113,12 +182,15 @@ public class NoticeBoardLocalImpl implements NoticeBoard {
 			// This is the first message posted by the user so initialise their
 			// message board
 			messagesForAuthorByPostTime = new TreeSet<PostedMessage>();
+			sortedMessagesForAuthorByAuthorName.put(authorUser.getName(),
+					messagesForAuthorByPostTime);
 		}
 
 		// Create a new message base on the arguements
 		// TODO deal with illegal argument if the text is trivial
+		int nextMessageNumber = messagesForAuthorByPostTime.size() + 1;
 		PostedMessage newMessage = new PostedMessage(authorUser, message,
-				requestReceiptTime);
+				requestReceiptTime, nextMessageNumber);
 
 		messagesForAuthorByPostTime.add(newMessage);
 
@@ -138,26 +210,30 @@ public class NoticeBoardLocalImpl implements NoticeBoard {
 	 *            the time that the request to read the messages was recieved
 	 * @return the messages associated with the passed author name formatted for
 	 *         inclusion in the response for display to the user. Null if no
-	 *         messages have been posted by the specified user
+	 *         messages have been posted by the specified user. If the request
+	 *         could not be processed, error lines to be displayed to the user
+	 *         will be returned (TBC)
 	 */
 	private List<String> readMessages(String author, long requestReceiptTime) {
 		// TODO deal with the author string not being valid
 		User authorUser = userManager.retrieveUser(author, false);
-		
+
 		// Return null if the author is not known
 		if (authorUser == null) {
 			return null;
 		}
-		SortedSet<PostedMessage> sortedMessagesForAuthor = sortedMessagesForAuthorByAuthorName.get(authorUser.getName());
-		
+		SortedSet<PostedMessage> sortedMessagesForAuthor = sortedMessagesForAuthorByAuthorName
+				.get(authorUser.getName());
+
 		// Return null if there are no messages for the author
 		if (sortedMessagesForAuthor == null) {
 			return null;
 		}
-		
-		// Return the formatted response lines
-		return respFormatter.formatMessagesForResponse(new ArrayList<PostedMessage>(sortedMessagesForAuthor), requestReceiptTime);
-	}
 
+		// Return the formatted response lines
+		return respFormatter.formatMessagesForResponse(
+				new ArrayList<PostedMessage>(sortedMessagesForAuthor),
+				requestReceiptTime);
+	}
 
 }

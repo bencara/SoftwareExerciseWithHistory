@@ -19,17 +19,22 @@ public class PostedMessage implements Comparable<PostedMessage> {
 	private final User author;
 	private final String text;
 	private final long postTime;
+	private final int postOrder;
 
 	/**
 	 * Public constructor requiring all the mandatory attributes.
 	 * 
 	 * @param author
-	 *            may not be null
+	 *            the author of the message may not be null
 	 * @param text
-	 *            may not be null or an empty string
+	 *            the message text may not be null or an empty string
 	 * @param postTime
+	 *            the time that the post request was received
+	 * @param postOrder
+	 *            an integer used to determine the ordering of messages for an
+	 *            author when multiple messages are received in the same millisecond
 	 */
-	public PostedMessage(User author, String text, long postTime) {
+	public PostedMessage(User author, String text, long postTime, int postOrder) {
 		super();
 		// Check arguments
 		if (author == null || StringUtils.trimToNull(text) == null) {
@@ -40,6 +45,7 @@ public class PostedMessage implements Comparable<PostedMessage> {
 		this.author = author;
 		this.text = text;
 		this.postTime = postTime;
+		this.postOrder = postOrder;
 	}
 
 	/**
@@ -62,6 +68,13 @@ public class PostedMessage implements Comparable<PostedMessage> {
 	public long getPostTime() {
 		return postTime;
 	}
+	
+	/**
+	 * @return the postTime
+	 */
+	public long getPostOrder() {
+		return postOrder;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -79,7 +92,7 @@ public class PostedMessage implements Comparable<PostedMessage> {
 		PostedMessage toBeCompared = (PostedMessage) o;
 		return new EqualsBuilder().append(author, toBeCompared.author)
 				.append(postTime, toBeCompared.postTime)
-				.append(text, toBeCompared.text).isEquals();
+				.append(text, toBeCompared.text).append(postOrder, toBeCompared.postOrder).isEquals();
 
 	}
 
@@ -91,29 +104,33 @@ public class PostedMessage implements Comparable<PostedMessage> {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37).append(author).append(postTime)
-				.append(text).toHashCode();
+				.append(text).append(postOrder).toHashCode();
 	}
 
 	/**
-	 * Natural comparison based on comparing (in order) author name, posted time
+	 * Natural comparison based on comparing (in order) posted time (desc), author name, posted order (desc)
 	 * and then message text.
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
 	public int compareTo(PostedMessage messageToCompare) {
-		long comparisonValue = this.author.getName().compareTo(
-				messageToCompare.author.getName());
+		long comparisonValue = messageToCompare.postTime - this.postTime;
+		
 		if (comparisonValue == 0) {
-			comparisonValue = this.postTime - messageToCompare.postTime;
+			comparisonValue = this.author.getName().compareTo(
+					messageToCompare.author.getName());
 		}
+		if (comparisonValue == 0) {
+			comparisonValue = messageToCompare.postOrder - this.postOrder;
+		}
+		
 		if (comparisonValue == 0) {
 			comparisonValue = this.text.compareTo(messageToCompare.text);
 		}
 
 		// If the value is positive return 1
 		if (comparisonValue > 0) {
-
 			return 1;
 		}
 

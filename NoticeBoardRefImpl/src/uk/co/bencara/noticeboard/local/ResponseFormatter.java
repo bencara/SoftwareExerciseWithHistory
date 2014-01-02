@@ -8,6 +8,7 @@ import java.util.List;
 
 import uk.co.bencara.noticeboard.model.PostedMessage;
 
+
 /**
  * A utility class to provide formatting for the response to be returned to the
  * client.

@@ -3,8 +3,12 @@ package uk.co.bencara.noticeboard;
 import java.util.List;
 
 /**
- * Interface describing the behaviour of a notice board
+ * Interface describing the behaviour of a notice board.
+ * 
+ * 
+ * 
  * @author Les Eckersley
+ * 
  *
  */
 public interface NoticeBoard {

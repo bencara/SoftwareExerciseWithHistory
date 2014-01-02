@@ -3,9 +3,9 @@
  */
 package uk.co.bencara.noticeboard.local;
 
-
 /**
- * A class to provide functionality to parser a notice board command input string and populate a command object
+ * A class to provide functionality to parser a notice board command input
+ * string and populate a command object
  * 
  * @author Les Eckersley
  * 
@@ -17,7 +17,8 @@ public class CommandInterpreter {
 	 * be returned if the message cannot be interpreted.
 	 * 
 	 * @param commandString
-	 * @return a correctly populated command or null if the string could not be interprted
+	 * @return a correctly populated command or null if the string could not be
+	 *         interprted
 	 */
 	public NoticeBoardCommand interpretCommandString(String commandString) {
 		if (commandString == null) {
@@ -32,13 +33,14 @@ public class CommandInterpreter {
 		StringBuilder messageBuilder = new StringBuilder();
 		int commandArgumentsFound = 0;
 		boolean success = true;
-		
+
 		// Special case for the read command which has no command string
-		if(commandParts.length == 1){
+		if (commandParts.length == 1) {
 			commandType = NoticeBoardCommandType.READ;
 		}
-		
-		// Name a loop so that we can stop processing the message if it is invalid
+
+		// Name a loop so that we can stop processing the message if it is
+		// invalid
 		ParsingLoop: for (String candidateCommandPart : commandParts) {
 			// Since we are splitting using whitespace no need to trim
 			// but have to allow for whitespaces in the message
@@ -56,9 +58,11 @@ public class CommandInterpreter {
 
 			case 1:
 				// The second none null token must be the command string
-				commandType = CommandTypeMapper.getMappedCommandType(candidateCommandPart);
+				commandType = CommandTypeMapper
+						.getMappedCommandType(candidateCommandPart);
 				if (commandType == null) {
-					// We do not understand the command type so the request is a failure
+					// We do not understand the command type so the request is a
+					// failure
 					success = false;
 					break ParsingLoop;
 				}
@@ -74,8 +78,9 @@ public class CommandInterpreter {
 					// This is the first part of the message to be posted
 					// so start building the message
 					messageBuilder.append(candidateCommandPart);
-				} else{
-					// We are not expecting more info for the supported messages so we cannot interpret the request
+				} else {
+					// We are not expecting more info for the supported messages
+					// so we cannot interpret the request
 					success = false;
 					break ParsingLoop;
 				}
@@ -83,25 +88,26 @@ public class CommandInterpreter {
 				break;
 
 			default:
-				
-				// add another part of the message remembering to replace any whitespace that has been interpreted as a delimitter
+
+				// add another part of the message remembering to replace any
+				// whitespace that has been interpreted as a delimitter
 				messageBuilder.append(" ");
 				messageBuilder.append(candidateCommandPart);
 				break;
 			}
 		}
-		
+
 		if (success) {
 			String messageText = null;
 			if (messageBuilder.length() > 0) {
 				messageText = messageBuilder.toString();
 			}
-			
 
 			// We can interpret the message so return the appropriate command
-			return new NoticeBoardCommand(firstUserName, secondUserName, commandType, messageText);
+			return new NoticeBoardCommand(firstUserName, secondUserName,
+					commandType, messageText);
 		}
-		
+
 		// We can't interpret the message so return null.
 		return null;
 	}

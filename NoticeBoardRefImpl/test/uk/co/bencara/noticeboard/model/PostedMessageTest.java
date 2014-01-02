@@ -8,6 +8,9 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.co.bencara.noticeboard.model.PostedMessage;
+import uk.co.bencara.noticeboard.model.User;
+
 /**
  * A class to test the User POJO class.
  * 
@@ -46,7 +49,7 @@ public class PostedMessageTest {
 		// Check that a valid user name is accepted and the attributes populated
 
 		messageUnderTest = new PostedMessage(user1, "Hello World",
-				baseInsertTime);
+				baseInsertTime, 1);
 		assertEquals(
 				"The author should have been populated with the passed author and the author should be returned by the get method",
 				user1, messageUnderTest.getAuthor());
@@ -57,6 +60,10 @@ public class PostedMessageTest {
 		assertEquals(
 				"The posting time should have been populated with the passed posting time and the posting time should be returned by the get method",
 				baseInsertTime, messageUnderTest.getPostTime());
+		
+		assertEquals(
+				"The posting order should have been populated with the passed posting order and the posting order should be returned by the get method",
+				1, messageUnderTest.getPostOrder());
 	}
 
 	/**
@@ -67,7 +74,7 @@ public class PostedMessageTest {
 
 		try {
 			messageUnderTest = new PostedMessage(null, "Hello World",
-					baseInsertTime);
+					baseInsertTime, 1);
 			fail("Null User should have been rejected");
 		} catch (IllegalArgumentException iae) {
 			assertTrue(
@@ -85,7 +92,7 @@ public class PostedMessageTest {
 	public void testConstructorInvalidEmptyMessage() {
 		// Check empty message rejected
 		try {
-			messageUnderTest = new PostedMessage(user1, "  	", baseInsertTime);
+			messageUnderTest = new PostedMessage(user1, "  	", baseInsertTime, 1);
 			fail("Empty message should have been rejected");
 		} catch (IllegalArgumentException iae) {
 			assertTrue(
@@ -103,7 +110,7 @@ public class PostedMessageTest {
 	public void testConstructorInvalidNullMessage() {
 		// Check empty message rejected
 		try {
-			messageUnderTest = new PostedMessage(user1, null, baseInsertTime);
+			messageUnderTest = new PostedMessage(user1, null, baseInsertTime, 1);
 			fail("Null message should have been rejected");
 		} catch (IllegalArgumentException iae) {
 			assertTrue(
@@ -148,9 +155,9 @@ public class PostedMessageTest {
 	public void testEquals() {
 		// Check that all attributes the same returns equal
 		messageUnderTest = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		messageForComparison = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		assertTrue(
 				"Messages with identical attributes should be considered equal",
 				messageUnderTest.equals(messageForComparison));
@@ -160,9 +167,9 @@ public class PostedMessageTest {
 
 		// Check that different users is deemed not equal
 		messageUnderTest = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		messageForComparison = new PostedMessage(user2, secondOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		assertFalse("Messages with different user should not be equal",
 				messageUnderTest.equals(messageForComparison));
 		assertFalse("Messages with different user should not be equal",
@@ -170,9 +177,9 @@ public class PostedMessageTest {
 
 		// Check that different posted time is deemed not equal
 		messageUnderTest = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		messageForComparison = new PostedMessage(user1, secondOrderMessage,
-				baseInsertTime);
+				baseInsertTime, 1);
 		assertFalse("Messages with different post time should not be equal",
 				messageUnderTest.equals(messageForComparison));
 		assertFalse("Messages with different post time should not be equal",
@@ -180,12 +187,22 @@ public class PostedMessageTest {
 
 		// Check that different text is deemed not equal
 		messageUnderTest = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		messageForComparison = new PostedMessage(user1, firstOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		assertFalse("Messages with different text should not be equal",
 				messageUnderTest.equals(messageForComparison));
 		assertFalse("Messages with different text should not be equal",
+				messageForComparison.equals(messageUnderTest));
+		
+		// Check that different post order is deemed not equal
+		messageUnderTest = new PostedMessage(user1, firstOrderMessage,
+				laterInsertTime, 1);
+		messageForComparison = new PostedMessage(user1, firstOrderMessage,
+				laterInsertTime, 2);
+		assertFalse("Messages with different post order should not be equal",
+				messageUnderTest.equals(messageForComparison));
+		assertFalse("Messages with different post order should not be equal",
 				messageForComparison.equals(messageUnderTest));
 
 		// Check that null for comparison returns false
@@ -204,15 +221,15 @@ public class PostedMessageTest {
 	@Test
 	public void testHashcode() {
 
-		// Check that all attributes  the same (i.e. that will be equal) returns equal hash code
+		// Check that all attributes the same (i.e. that will be equal) returns
+		// equal hash code
 		messageUnderTest = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		messageForComparison = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
+				laterInsertTime, 1);
 		assertTrue(
 				"Messages with identical attributes should be return the same hashcode",
 				messageUnderTest.hashCode() == messageForComparison.hashCode());
-
 
 	}
 
@@ -222,54 +239,49 @@ public class PostedMessageTest {
 	@Test
 	public void testCompareTo() {
 
-		// Check that even when the message and post time would come first the
-		// author name overrides the comparison
+		// Check that the author, message text and post order ordering are
+		// overridden by the post time
+		messageUnderTest = new PostedMessage(user2, secondOrderMessage,
+				baseInsertTime, 2);
+		messageForComparison = new PostedMessage(user1, firstOrderMessage,
+				laterInsertTime, 1);
+		assertTrue("Reverse post time should be dominant in natural ordering",
+				messageUnderTest.compareTo(messageForComparison) > 0);
+		assertTrue("Reverse post time should be dominant in natural ordering",
+				messageForComparison.compareTo(messageUnderTest) < 0);
+
+		// Check that with same post time author is dominant
 		messageUnderTest = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
+				baseInsertTime, 2);
 		messageForComparison = new PostedMessage(user2, firstOrderMessage,
-				baseInsertTime);
-		assertTrue("Author should be dominant in the comparison",
+				baseInsertTime, 1);
+		assertTrue("Author should be dominant where post time is equal",
 				messageUnderTest.compareTo(messageForComparison) < 0);
-		assertTrue("Author should be dominant in the comparison",
+		assertTrue("Author should be dominant where post time is equal",
 				messageForComparison.compareTo(messageUnderTest) > 0);
 
-		// Check that with same author the post time dominates the text of
-		// the message
-		messageUnderTest = new PostedMessage(user1, secondOrderMessage,
-				baseInsertTime);
-		messageForComparison = new PostedMessage(user1, secondOrderMessage,
-				laterInsertTime);
-		assertTrue(
-				"Post time should be dominant in the comparison when author is the same",
-				messageUnderTest.compareTo(messageForComparison) < 0);
-		assertTrue(
-				"Author should be dominant in the comparison when author is the same",
-				messageForComparison.compareTo(messageUnderTest) > 0);
+		// Check that with same post time and author the post order determines ordering
+		messageUnderTest = new PostedMessage(user2, secondOrderMessage,
+				baseInsertTime, 1);
+		messageForComparison = new PostedMessage(user2, firstOrderMessage,
+				baseInsertTime, 2);
+		assertTrue("Reverse post order should be dominant where post time and author are equal",
+				messageUnderTest.compareTo(messageForComparison) > 0);
+		assertTrue("Reverse post order should be dominant where post time and author are equal",
+				messageForComparison.compareTo(messageUnderTest) < 0);
 
-		// Check that with same author and post time an text determines the
-		// ordering
+		// Check that with same post time, author and post order the message determines ordering
 		messageUnderTest = new PostedMessage(user1, firstOrderMessage,
-				baseInsertTime);
+				baseInsertTime, 1);
 		messageForComparison = new PostedMessage(user1, secondOrderMessage,
-				baseInsertTime);
+				baseInsertTime, 1);
 		assertTrue(
-				"Post time should be dominant in the comparison when author is the same",
+				"Message text should be user to determine order where post time, author and post order are equal",
 				messageUnderTest.compareTo(messageForComparison) < 0);
 		assertTrue(
-				"Author should be dominant in the comparison when author is the same",
+				"Message text should be user to determine order where post time, author and post order are equal",
 				messageForComparison.compareTo(messageUnderTest) > 0);
 
-		// Check that with same author, post time and text comparison returns 0
-		messageUnderTest = new PostedMessage(user1, secondOrderMessage,
-				baseInsertTime);
-		messageForComparison = new PostedMessage(user1, secondOrderMessage,
-				baseInsertTime);
-		assertTrue(
-				"Post time should be dominant in the comparison when author is the same",
-				messageUnderTest.compareTo(messageForComparison) == 0);
-		assertTrue(
-				"Author should be dominant in the comparison when author is the same",
-				messageForComparison.compareTo(messageUnderTest) == 0);
 
 	}
 

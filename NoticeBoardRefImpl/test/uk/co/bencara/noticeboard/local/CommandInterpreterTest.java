@@ -8,6 +8,10 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import uk.co.bencara.noticeboard.local.CommandInterpreter;
+import uk.co.bencara.noticeboard.local.NoticeBoardCommand;
+import uk.co.bencara.noticeboard.local.NoticeBoardCommandType;
+
 /**
  * A class to test the functionality of the CommandInterpreter, currently this
  * only test the behaviuor with valid inputs
