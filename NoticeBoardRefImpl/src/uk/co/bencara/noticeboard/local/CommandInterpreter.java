@@ -84,7 +84,7 @@ public class CommandInterpreter {
 
 			default:
 				
-				// add another part of the message remembering to replace any whaitspace that has been interpretted as a delimitter
+				// add another part of the message remembering to replace any whitespace that has been interpreted as a delimitter
 				messageBuilder.append(" ");
 				messageBuilder.append(candidateCommandPart);
 				break;
