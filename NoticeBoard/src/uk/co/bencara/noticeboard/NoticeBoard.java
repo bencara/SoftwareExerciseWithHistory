@@ -9,19 +9,13 @@ import java.util.List;
  */
 public interface NoticeBoard {
 	
-	public static final String postCommand = "->";
-	
-	public static final String followCommand = "follows";
-	
-	public static final String wallCommand = "wall";
-	
 	
 	/**
 	 * A method to make a request of the notice board.
 	 * 
 	 * @param commandString
-	 * @return a list of string messages approriate to the input request.
+	 * @return a list of string messages appropriate to the input request.  May be null or empty.
 	 */
-	public List<String> makeRequest(String commandString);
+	public List<String> processRequest(String commandString);
 
 }

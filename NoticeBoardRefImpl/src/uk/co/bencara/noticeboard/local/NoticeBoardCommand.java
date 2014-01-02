@@ -12,21 +12,22 @@ public class NoticeBoardCommand {
 	
 	private final String firstUserName;
 	private final String secondUserName;
-	private final String command;
+	private final NoticeBoardCommandType commandType;
 	private final String messageText;
 	
 	/**
+	 * Construct the command.
 	 * @param originatingUserName
 	 * @param targetUserName
 	 * @param command
 	 * @param messageText
 	 */
 	public NoticeBoardCommand(String originatingUserName,
-			String targetUserName, String command, String messageText) {
+			String targetUserName, NoticeBoardCommandType commandType, String messageText) {
 		super();
 		this.firstUserName = originatingUserName;
 		this.secondUserName = targetUserName;
-		this.command = command;
+		this.commandType = commandType;
 		this.messageText = messageText;
 	}
 
@@ -47,8 +48,8 @@ public class NoticeBoardCommand {
 	/**
 	 * @return the command
 	 */
-	public String getCommand() {
-		return command;
+	public NoticeBoardCommandType getCommandType() {
+		return commandType;
 	}
 
 	/**

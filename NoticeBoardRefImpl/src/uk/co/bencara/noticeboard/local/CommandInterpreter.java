@@ -3,14 +3,6 @@
  */
 package uk.co.bencara.noticeboard.local;
 
-import static uk.co.bencara.noticeboard.NoticeBoard.followCommand;
-import static uk.co.bencara.noticeboard.NoticeBoard.postCommand;
-import static uk.co.bencara.noticeboard.NoticeBoard.wallCommand;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.regex.Pattern;
 
 /**
  * A class to provide functionality to parser a notice board command input string and populate a command object
@@ -18,45 +10,41 @@ import java.util.regex.Pattern;
  * @author Les Eckersley
  * 
  */
-public class CommandParser {
-
-	private static final List<String> validCommands;
-
-	static {
-		validCommands = new ArrayList<String>();
-		validCommands.add(followCommand);
-		validCommands.add(postCommand);
-		validCommands.add(wallCommand);
-	}
+public class CommandInterpreter {
 
 	/**
 	 * A method to convert a command string into a NoticeBoardCommand. Null will
-	 * be returned if the message cannot be interpretted.
+	 * be returned if the message cannot be interpreted.
 	 * 
 	 * @param commandString
-	 * @return a correctly populated command or null if the string could not be interpretted
+	 * @return a correctly populated command or null if the string could not be interprted
 	 */
-	public NoticeBoardCommand InterpretCommandString(String commandString) {
+	public NoticeBoardCommand interpretCommandString(String commandString) {
 		if (commandString == null) {
 			// TODO behaviour when a null string is passed
 		}
 
 		// Tokenise based on whitespace
-		String[] commandParts = commandString.split("/s");
+		String[] commandParts = commandString.split(" ");
 		String firstUserName = null;
 		String secondUserName = null;
-		String command = null;
+		NoticeBoardCommandType commandType = null;
 		StringBuilder messageBuilder = new StringBuilder();
 		int commandArgumentsFound = 0;
 		boolean success = true;
+		
+		// Special case for the read command which has no command string
+		if(commandParts.length == 1){
+			commandType = NoticeBoardCommandType.READ;
+		}
 		
 		// Name a loop so that we can stop processing the message if it is invalid
 		ParsingLoop: for (String candidateCommandPart : commandParts) {
 			// Since we are splitting using whitespace no need to trim
 			// but have to allow for whitespaces in the message
-			if (candidateCommandPart != null
-					|| ("".equals(candidateCommandPart) && !postCommand
-							.equals(command))) {
+			if (candidateCommandPart == null
+					|| ("".equals(candidateCommandPart) && !NoticeBoardCommandType.POST
+							.equals(commandType))) {
 				continue;
 			}
 			switch (commandArgumentsFound) {
@@ -68,24 +56,26 @@ public class CommandParser {
 
 			case 1:
 				// The second none null token must be the command string
-				if (!validCommands.contains(candidateCommandPart)) {
+				commandType = CommandTypeMapper.getMappedCommandType(candidateCommandPart);
+				if (commandType == null) {
+					// We do not understand the command type so the request is a failure
 					success = false;
 					break ParsingLoop;
 				}
-				command = candidateCommandPart;
 				commandArgumentsFound = 2;
 				break;
 
 			case 2:
-				if (followCommand.equals(command)) {
+				if (NoticeBoardCommandType.FOLLOW.equals(commandType)) {
 					// If it is a follow command then the third significant
 					// token must be the user name of the person to be followed
 					secondUserName = candidateCommandPart;
-				} else if (postCommand.equals(command)) {
+				} else if (NoticeBoardCommandType.POST.equals(commandType)) {
 					// This is the first part of the message to be posted
 					// so start building the message
 					messageBuilder.append(candidateCommandPart);
 				} else{
+					// We are not expecting more info for the supported messages so we cannot interpret the request
 					success = false;
 					break ParsingLoop;
 				}
@@ -93,6 +83,7 @@ public class CommandParser {
 				break;
 
 			default:
+				
 				// add another part of the message remembering to replace any whaitspace that has been interpretted as a delimitter
 				messageBuilder.append(" ");
 				messageBuilder.append(candidateCommandPart);
@@ -101,8 +92,14 @@ public class CommandParser {
 		}
 		
 		if (success) {
+			String messageText = null;
+			if (messageBuilder.length() > 0) {
+				messageText = messageBuilder.toString();
+			}
+			
+
 			// We can interpret the message so return the appropriate command
-			return new NoticeBoardCommand(firstUserName, secondUserName, command, messageBuilder.toString());
+			return new NoticeBoardCommand(firstUserName, secondUserName, commandType, messageText);
 		}
 		
 		// We can't interpret the message so return null.

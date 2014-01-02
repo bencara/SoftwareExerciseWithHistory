@@ -49,7 +49,7 @@ public class SimpleConsoleClient {
 			String noticeBoardInput = console.readLine("\n>");
 			
 			// Send the command to the notice board and record the response
-			List<String> response = noticeBoard.makeRequest(noticeBoardInput);
+			List<String> response = noticeBoard.processRequest(noticeBoardInput);
 			
 			// If the response is not null output for the use to view.
 			if (response != null) {
